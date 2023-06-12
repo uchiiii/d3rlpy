@@ -7,7 +7,7 @@ from typing import Any, Dict, Iterator, List, Optional
 
 import numpy as np
 import structlog
-from tensorboardX import SummaryWriter
+from lightning.pytorch.loggers import Logger
 from typing_extensions import Protocol
 
 
@@ -38,12 +38,12 @@ class D3RLPyLogger:
     _verbose: bool
     _metrics_buffer: Dict[str, List[float]]
     _params: Optional[Dict[str, float]]
-    _writer: Optional[SummaryWriter]
+    _writer: Optional[Logger]
 
     def __init__(
         self,
         experiment_name: str,
-        tensorboard_dir: Optional[str] = None,
+        external_logger: Optional[Logger] = None,
         save_metrics: bool = True,
         root_dir: str = "logs",
         verbose: bool = True,
@@ -75,13 +75,7 @@ class D3RLPyLogger:
 
         self._metrics_buffer = {}
 
-        if tensorboard_dir:
-            tfboard_path = os.path.join(
-                tensorboard_dir, "runs", self._experiment_name
-            )
-            self._writer = SummaryWriter(logdir=tfboard_path)
-        else:
-            self._writer = None
+        self._writer = external_logger
 
         self._params = None
 
@@ -124,7 +118,7 @@ class D3RLPyLogger:
                     print(f"{epoch},{step},{metric}", file=f)
 
                 if self._writer:
-                    self._writer.add_scalar(f"metrics/{name}", metric, epoch)
+                    self._writer.log_metrics({name: metric}, epoch)
 
             metrics[name] = metric
 
@@ -137,12 +131,7 @@ class D3RLPyLogger:
             )
 
         if self._params and self._writer:
-            self._writer.add_hparams(
-                self._params,
-                metrics,
-                name=self._experiment_name,
-                global_step=epoch,
-            )
+            self._writer.log_hyperparams(self._params)
 
         # initialize metrics buffer
         self._metrics_buffer = {}

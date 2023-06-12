@@ -19,6 +19,7 @@ from typing import (
 import gym
 import numpy as np
 from tqdm.auto import tqdm
+from lightning.pytorch.loggers import Logger as PlLogger
 
 from .argument_utility import (
     ActionScalerArg,
@@ -358,7 +359,7 @@ class LearnableBase:
         logdir: str = "d3rlpy_logs",
         verbose: bool = True,
         show_progress: bool = True,
-        tensorboard_dir: Optional[str] = None,
+        external_logger: Optional[str] = None,
         eval_episodes: Optional[List[Episode]] = None,
         save_interval: int = 1,
         scorers: Optional[
@@ -415,7 +416,7 @@ class LearnableBase:
                 logdir,
                 verbose,
                 show_progress,
-                tensorboard_dir,
+                external_logger,
                 eval_episodes,
                 save_interval,
                 scorers,
@@ -437,7 +438,7 @@ class LearnableBase:
         logdir: str = "d3rlpy_logs",
         verbose: bool = True,
         show_progress: bool = True,
-        tensorboard_dir: Optional[str] = None,
+        external_logger: Optional[str] = None,
         eval_episodes: Optional[List[Episode]] = None,
         save_interval: int = 1,
         scorers: Optional[
@@ -549,7 +550,7 @@ class LearnableBase:
             with_timestamp,
             logdir,
             verbose,
-            tensorboard_dir,
+            external_logger,
         )
 
         # add reference to active logger to algo class during fit
@@ -775,7 +776,7 @@ class LearnableBase:
         with_timestamp: bool,
         logdir: str,
         verbose: bool,
-        tensorboard_dir: Optional[str],
+        external_logger: Optional[PlLogger],
     ) -> D3RLPyLogger:
         if experiment_name is None:
             experiment_name = self.__class__.__name__
@@ -785,7 +786,7 @@ class LearnableBase:
             save_metrics=save_metrics,
             root_dir=logdir,
             verbose=verbose,
-            tensorboard_dir=tensorboard_dir,
+            external_logger=external_logger,
             with_timestamp=with_timestamp,
         )
 

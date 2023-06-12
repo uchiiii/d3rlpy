@@ -52,6 +52,7 @@ if __name__ == "__main__":
           install_requires=["torch",
                             "scikit-learn",
                             "tensorboardX",
+                            "pytorch-lightning",
                             "tqdm",
                             "h5py",
                             "gym",
